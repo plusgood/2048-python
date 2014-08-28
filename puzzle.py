@@ -1,6 +1,8 @@
-from tkinter import *
+from __future__ import print_function
+from Tkinter import *
 from logic import *
 from random import *
+
 
 SIZE = 500
 GRID_LEN = 4
@@ -25,7 +27,12 @@ KEY_UP = "'w'"
 KEY_DOWN = "'s'"
 KEY_LEFT = "'a'"
 KEY_RIGHT = "'d'"
-
+arrows = {
+	'Up' : KEY_UP,
+	'Down' : KEY_DOWN,
+	'Left' : KEY_LEFT,
+	'Right' : KEY_RIGHT
+}
 class GameGrid(Frame):
     def __init__(self):
         Frame.__init__(self)
@@ -80,9 +87,10 @@ class GameGrid(Frame):
         self.update_idletasks()
         
     def key_down(self, event):
-        key = repr(event.char)
+        key = arrows.get(event.keysym, repr(event.char))
+        print(repr(key))
         if key in self.commands:
-            self.matrix,done = self.commands[repr(event.char)](self.matrix)
+            self.matrix, done = self.commands[key](self.matrix)
             if done:
                 self.matrix = add_two(self.matrix)
                 self.update_grid_cells()
