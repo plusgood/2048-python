@@ -1,5 +1,7 @@
-2048-python
+2048-python with AI
 ===========
+Forked from Yangshun (thanks)!
+I plan to add a simple AI to this version as an exercise for my school's CS club
 
 Based on the popular game [2048](https://github.com/gabrielecirulli/2048) by Gabriele Cirulli, here is a Python version that uses TKinter. 
 
@@ -7,7 +9,7 @@ Based on the popular game [2048](https://github.com/gabrielecirulli/2048) by Gab
 
 To start the game, run:
     
-    $ python3 puzzle.py
+    $ python puzzle.py
 
 
 Contributors:
