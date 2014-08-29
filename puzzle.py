@@ -2,6 +2,8 @@ from __future__ import print_function
 from Tkinter import *
 from logic import *
 from random import *
+from AI import *
+import thread
 
 
 SIZE = 500
@@ -35,8 +37,10 @@ arrows = {
 }
 class GameGrid(Frame):
     def __init__(self):
-        Frame.__init__(self)
-
+        self.root = Tk()
+        
+        Frame.__init__(self, master=self.root)
+        
         self.grid()
         self.master.title('2048')
         self.master.bind("<Key>", self.key_down)
@@ -44,12 +48,16 @@ class GameGrid(Frame):
         #self.gamelogic = gamelogic
         self.commands = {   KEY_UP: up, KEY_DOWN: down, KEY_LEFT: left, KEY_RIGHT: right,
                             KEY_UP_ALT: up, KEY_DOWN_ALT: down, KEY_LEFT_ALT: left, KEY_RIGHT_ALT: right }
-
+        
         self.grid_cells = []
         self.init_grid()
         self.init_matrix()
-        self.update_grid_cells()
+        self.root.after(100, self.update_in_background)
         
+    def update_in_background(self):
+      self.update_grid_cells()
+      self.root.after(100, self.update_in_background)
+    def start(self):
         self.mainloop()
 
     def init_grid(self):
@@ -101,6 +109,7 @@ class GameGrid(Frame):
                 if game_state(self.matrix)=='lose':
                     self.grid_cells[1][1].configure(text="You",bg=BACKGROUND_COLOR_CELL_EMPTY)
                     self.grid_cells[1][2].configure(text="Lose!",bg=BACKGROUND_COLOR_CELL_EMPTY)
+                    
 
 
     def generate_next(self):
@@ -110,3 +119,8 @@ class GameGrid(Frame):
         self.matrix[index[0]][index[1]] = 2
 
 gamegrid = GameGrid()
+ai = AI(gamegrid)
+thread.start_new_thread(ai.start, ())
+gamegrid.start()
+
+
