@@ -55,8 +55,8 @@ class GameGrid(Frame):
         self.root.after(100, self.update_in_background)
         
     def update_in_background(self):
-      self.update_grid_cells()
-      self.root.after(100, self.update_in_background)
+        self.update_grid_cells()
+        self.root.after(100, self.update_in_background)
     def start(self):
         self.mainloop()
 
@@ -122,5 +122,4 @@ gamegrid = GameGrid()
 ai = AI(gamegrid)
 thread.start_new_thread(ai.start, ())
 gamegrid.start()
-
 
