@@ -1,20 +1,21 @@
 from logic import *
-from math import log
+import math
 import time
+from random import randrange
 
 class AI(object):
     def __init__(self, gamegrid):
         self.gamegrid = gamegrid
     def start(self):
         while game_state(self.gamegrid.matrix) == 'not over':
-            self.gamegrid.matrix, done = left(self.gamegrid.matrix)
+            bestmove, bestscore = best_move(self.gamegrid.matrix)
+            self.gamegrid.matrix, done = bestmove(self.gamegrid.matrix)
+            self.gamegrid.generate_next()
             print self.gamegrid.matrix
-            best_move(self.game.matrix)
-            self.gamegrid.generate_next()
-            time.sleep(0.5)
-            self.gamegrid.matrix, done = down(self.gamegrid.matrix)
-            self.gamegrid.generate_next()
-            time.sleep(0.5)
+            
+def log(x):
+    if x == 0: return 0
+    return math.log(x)
 
 def smoothness(matrix):
     s = 0
@@ -32,6 +33,7 @@ def smoothness(matrix):
 
 a = [[3,0],[2,0],[1,0],[0,0],[0,1],[1,1],[2,1],[3,1],[3,2],[2,2],[1,2],[0,2],[0,3],[1,3],[2,3],[3,3]]
 assert len(a) == 16
+
 def monotonicity(matrix):
     s = 0
     for x, y in zip(a, a[1:]):
@@ -39,14 +41,38 @@ def monotonicity(matrix):
     return s
 
 def free_space(matrix):
-    return sum(matrix, []).count(0)
+    #print matrix
+    
+    try:return sum(matrix, []).count(0)
+    except Exception as e:
+        print e
 
 def heuristic(matrix):
     return 20*free_space(matrix) + 2*monotonicity(matrix) + smoothness(matrix)
+
+def add_random(matrix):
+    if sum(matrix, []).count(0) == 0: return
+    i, j = randrange(4), randrange(4)
+    while matrix[i][j] != 0:
+        i, j = randrange(4), randrange(4)
+    matrix[i][j] = 2
     
-def best_move(matrix):
-    pass
-        
-
-
-        
+    
+MAX_DEPTH = 5
+def best_move(matrix, depth=0):
+    if depth > MAX_DEPTH: return matrix, heuristic(matrix)
+    possible = []
+    bestmove, bestscore = None, -float('inf')
+    
+    for move in [left, up, down, right]:
+        newmatrix, done = move(matrix)
+        add_random(newmatrix)
+        if newmatrix == matrix: continue
+        else:
+            m, s = best_move(newmatrix, depth+1)
+            if s > bestscore:
+                bestscore = s
+                bestmove = move
+                
+    return bestmove, bestscore
+    
