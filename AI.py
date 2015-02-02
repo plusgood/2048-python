@@ -16,11 +16,11 @@ class AI(object):
 
             self.gamegrid.matrix, done = bestmove(self.gamegrid.matrix)
             self.gamegrid.generate_next()
-            print self.gamegrid.matrix
+            print self.gamegrid.matrix, bestscore, minus_middle(self.gamegrid.matrix)
             
 def log(x):
-    if x == 0: return 0
-    return math.log(x)
+    if x <= 1: return 0
+    return math.log(x, 2)
 
 def smoothness(matrix):
     s = 0
@@ -44,29 +44,51 @@ def monotonicity(matrix):
         s += matrix[y[0]][y[1]] > matrix[x[0]][x[1]]
     return s
 
-def bottom_left(matrix):
-    return log(matrix[3][0])
-
 def free_space(matrix):    
-    try:return sum(matrix, []).count(0)
-    except Exception as e:
-        print e
+    return sum(x.count(0) for x in matrix)
+
+def corners(matrix):
+    return sum(log(matrix[x][y])**2 for x in [0, 3] for y in [0, 3])
+
+def minus_middle(matrix):
+    return sum(-log(matrix[x][y])**2 for x in [1, 2] for y in [1, 2])
+
 
 def heuristic(matrix):
-    return 20*free_space(matrix) + 10*smoothness(matrix) + \
-           0 #10*monotonicity(matrix) + 40000*bottom_left(matrix)
+    
+#    print free_space(matrix), smoothness(matrix), corners(matrix), minus_middle(matrix)
+    highest = log(max(map(max, matrix)))
+    
+    return smoothness(matrix) + highest*free_space(matrix) + minus_middle(matrix)
+# + 10*smoothness(matrix) + \
+#           3 * corners(matrix) + 3 * minus_middle(matrix)
 
 def add_random(matrix):
-    if sum(matrix, []).count(0) == 0: return False
-    i, j = randrange(4), randrange(4)
-    while matrix[i][j] != 0:
+    f = free_space(matrix)
+    if f > 4:
         i, j = randrange(4), randrange(4)
-    matrix[i][j] = 2
+        while matrix[i][j] != 0:
+            i, j = randrange(4), randrange(4)
+        matrix[i][j] = 2
+        return True
+    elif f == 0:
+        return False
 
+    wi, wj, wh = None, None, float('inf')
+    for i in xrange(4):
+        for j in xrange(4):
+            if matrix[i][j] != 0: continue
+            matrix[i][j] = 2
+            h = heuristic(matrix)
+            if h < wh:
+                wi, wj, wh = i, j, h
+            matrix[i][j] = 0
+    matrix[wi][wj] = 2
     return True
+
     
     
-MAX_DEPTH = 4
+MAX_DEPTH = 5
 MOVES = [left, up, down, right]
 
 def best_move(matrix, depth=0):
@@ -84,7 +106,7 @@ def best_move(matrix, depth=0):
             pos.append((h, move1, newnewmatrix))
 
     pos.sort(reverse=True)
-    pos = pos[:min(len(pos), 3)]
+    pos = pos[:min(len(pos), 2)]
     bestmove, bestscore = None, -float('inf')
     for h, move, mat in pos:
         m, s = best_move(mat, depth+1)
